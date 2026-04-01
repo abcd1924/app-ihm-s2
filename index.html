@@ -1,150 +1,158 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mapa Mental de App Bancaria</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <script src="https://gojs.net/latest/release/go.js"></script>
-</head>
-<body>
-    
+  </head>
+  <body>
     <h1>Mapa Mental: De la Percepción del Usuario al Sistema Real</h1>
-    <p>Haz clic en el botón para alternar entre el **modelo mental** del usuario novato y el **modelo conceptual** del sistema bancario.</p>
+    <p>
+      Haz clic en el botón para alternar entre el **modelo mental** del usuario
+      novato y el **modelo conceptual** del sistema bancario.
+    </p>
 
     <div id="diagram-container"></div>
 
     <div id="controls">
-        <button id="toggleButton">Ver Modelo Conceptual del Sistema</button>
-        <div class="legend">
-            <div class="legend-item">
-                <div class="color-box user-color"></div>
-                <span>Modelo Mental del Usuario</span>
-            </div>
-            <div class="legend-item">
-                <div class="color-box system-color"></div>
-                <span>Modelo Conceptual del Sistema</span>
-            </div>
+      <button id="toggleButton">Ver Modelo Conceptual del Sistema</button>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="color-box user-color"></div>
+          <span>Modelo Mental del Usuario</span>
         </div>
+        <div class="legend-item">
+          <div class="color-box system-color"></div>
+          <span>Modelo Conceptual del Sistema</span>
+        </div>
+      </div>
     </div>
 
+    <footer>
+      <p>&copy; Valentino Jordano Castro Olazábal</p>
+    </footer>
+
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            var $ = go.GraphObject.make;
+      document.addEventListener("DOMContentLoaded", function () {
+        var $ = go.GraphObject.make;
 
-            var userColor = "#3b82f6";
-            var systemColor = "#0f766e";
-            var isUserModelVisible = true;
+        var userColor = "#3b82f6";
+        var systemColor = "#0f766e";
+        var isUserModelVisible = true;
 
-            var userLegendBox = document.querySelector(".user-color");
-            var systemLegendBox = document.querySelector(".system-color");
-            if (userLegendBox) userLegendBox.style.backgroundColor = userColor;
-            if (systemLegendBox) systemLegendBox.style.backgroundColor = systemColor;
+        var userLegendBox = document.querySelector(".user-color");
+        var systemLegendBox = document.querySelector(".system-color");
+        if (userLegendBox) userLegendBox.style.backgroundColor = userColor;
+        if (systemLegendBox)
+          systemLegendBox.style.backgroundColor = systemColor;
 
-            var diagram = $(go.Diagram, "diagram-container", {
-                initialAutoScale: go.Diagram.Uniform,
-                contentAlignment: go.Spot.Center,
-                "undoManager.isEnabled": false,
-                layout: $(go.TreeLayout, {
-                    angle: 0,
-                    layerSpacing: 45,
-                    nodeSpacing: 25
-                })
-            });
-
-            diagram.nodeTemplate =
-                $(go.Node, "Auto",
-                    { selectionAdorned: false },
-                    $(go.Shape, "RoundedRectangle",
-                        {
-                            strokeWidth: 0,
-                            fill: userColor,
-                            portId: "",
-                            cursor: "pointer"
-                        },
-                        new go.Binding("fill", "color")
-                    ),
-                    $(go.TextBlock,
-                        {
-                            margin: 10,
-                            stroke: "#ffffff",
-                            font: "bold 13px Segoe UI, sans-serif",
-                            wrap: go.TextBlock.WrapFit,
-                            textAlign: "center",
-                            width: 180
-                        },
-                        new go.Binding("text", "text")
-                    )
-                );
-
-            diagram.linkTemplate =
-                $(go.Link,
-                    {
-                        routing: go.Routing.Orthogonal,
-                        corner: 10,
-                        selectable: false
-                    },
-                    $(go.Shape,
-                        {
-                            strokeWidth: 2,
-                            stroke: "#94a3b8"
-                        }
-                    )
-                );
-
-            var userMentalModel = [
-                { key: 1, text: "App Bancaria", color: userColor },
-                { key: 2, parent: 1, text: "Ver saldo" },
-                { key: 3, parent: 1, text: "Enviar dinero" },
-                { key: 4, parent: 1, text: "Pagar servicios" },
-                { key: 5, parent: 2, text: "Dinero disponible ahora" },
-                { key: 6, parent: 3, text: "A un contacto" },
-                { key: 7, parent: 3, text: "Rápido y simple" },
-                { key: 8, parent: 4, text: "Recibos y cuentas" }
-            ];
-
-            var systemConceptualModel = [
-                { key: 101, text: "Sistema Bancario", color: systemColor },
-                { key: 102, parent: 101, text: "Autenticación" },
-                { key: 103, parent: 101, text: "Gestor de cuentas" },
-                { key: 104, parent: 101, text: "Motor de transferencias" },
-                { key: 105, parent: 101, text: "Módulo de pagos" },
-                { key: 106, parent: 104, text: "Validación de fondos" },
-                { key: 107, parent: 104, text: "Registro de transacción" },
-                { key: 108, parent: 105, text: "Integración con facturadores" },
-                { key: 109, parent: 103, text: "Consulta de saldo en BD" }
-            ];
-
-            function paintNodes(nodes, color) {
-                return nodes.map(function (node) {
-                    return Object.assign({}, node, {
-                        color: node.color || color
-                    });
-                });
-            }
-
-            function renderModel() {
-                var data = isUserModelVisible
-                    ? paintNodes(userMentalModel, userColor)
-                    : paintNodes(systemConceptualModel, systemColor);
-
-                diagram.model = new go.TreeModel(data);
-            }
-
-            var button = document.getElementById("toggleButton");
-
-            button.addEventListener("click", function () {
-                isUserModelVisible = !isUserModelVisible;
-                renderModel();
-
-                button.textContent = isUserModelVisible
-                    ? "Ver Modelo Conceptual del Sistema"
-                    : "Ver Modelo Mental del Usuario";
-            });
-
-            renderModel();
+        var diagram = $(go.Diagram, "diagram-container", {
+          initialAutoScale: go.Diagram.Uniform,
+          contentAlignment: go.Spot.Center,
+          "undoManager.isEnabled": false,
+          layout: $(go.TreeLayout, {
+            angle: 0,
+            layerSpacing: 45,
+            nodeSpacing: 25,
+          }),
         });
-    </script>
 
-</body>
+        diagram.nodeTemplate = $(
+          go.Node,
+          "Auto",
+          { selectionAdorned: false },
+          $(
+            go.Shape,
+            "RoundedRectangle",
+            {
+              strokeWidth: 0,
+              fill: userColor,
+              portId: "",
+              cursor: "pointer",
+            },
+            new go.Binding("fill", "color"),
+          ),
+          $(
+            go.TextBlock,
+            {
+              margin: 10,
+              stroke: "#ffffff",
+              font: "bold 13px Segoe UI, sans-serif",
+              wrap: go.TextBlock.WrapFit,
+              textAlign: "center",
+              width: 180,
+            },
+            new go.Binding("text", "text"),
+          ),
+        );
+
+        diagram.linkTemplate = $(
+          go.Link,
+          {
+            routing: go.Routing.Orthogonal,
+            corner: 10,
+            selectable: false,
+          },
+          $(go.Shape, {
+            strokeWidth: 2,
+            stroke: "#94a3b8",
+          }),
+        );
+
+        var userMentalModel = [
+          { key: 1, text: "App Bancaria", color: userColor },
+          { key: 2, parent: 1, text: "Ver saldo" },
+          { key: 3, parent: 1, text: "Enviar dinero" },
+          { key: 4, parent: 1, text: "Pagar servicios" },
+          { key: 5, parent: 2, text: "Dinero disponible ahora" },
+          { key: 6, parent: 3, text: "A un contacto" },
+          { key: 7, parent: 3, text: "Rápido y simple" },
+          { key: 8, parent: 4, text: "Recibos y cuentas" },
+        ];
+
+        var systemConceptualModel = [
+          { key: 101, text: "Sistema Bancario", color: systemColor },
+          { key: 102, parent: 101, text: "Autenticación" },
+          { key: 103, parent: 101, text: "Gestor de cuentas" },
+          { key: 104, parent: 101, text: "Motor de transferencias" },
+          { key: 105, parent: 101, text: "Módulo de pagos" },
+          { key: 106, parent: 104, text: "Validación de fondos" },
+          { key: 107, parent: 104, text: "Registro de transacción" },
+          { key: 108, parent: 105, text: "Integración con facturadores" },
+          { key: 109, parent: 103, text: "Consulta de saldo en BD" },
+        ];
+
+        function paintNodes(nodes, color) {
+          return nodes.map(function (node) {
+            return Object.assign({}, node, {
+              color: node.color || color,
+            });
+          });
+        }
+
+        function renderModel() {
+          var data = isUserModelVisible
+            ? paintNodes(userMentalModel, userColor)
+            : paintNodes(systemConceptualModel, systemColor);
+
+          diagram.model = new go.TreeModel(data);
+        }
+
+        var button = document.getElementById("toggleButton");
+
+        button.addEventListener("click", function () {
+          isUserModelVisible = !isUserModelVisible;
+          renderModel();
+
+          button.textContent = isUserModelVisible
+            ? "Ver Modelo Conceptual del Sistema"
+            : "Ver Modelo Mental del Usuario";
+        });
+
+        renderModel();
+      });
+    </script>
+  </body>
 </html>
